@@ -5,6 +5,7 @@ name: Deploy Spell the Animals app
 on:
   push:
     branches:
+      - master
       - claude/animal-spelling-app-6ijwb2
     paths:
       - "animal-spelling-app/**"
