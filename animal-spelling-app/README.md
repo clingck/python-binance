@@ -1,51 +1,53 @@
-# 🐾 Spell the Animals!
+# 🔤 Sound Play — Learn Letters & Sounds
 
-A simple, colorful spelling game for young children. The child sees a picture of
-an animal and spells its name by tapping the **correct next letter from three
-choices**. When the word is finished, the animal bounces, confetti flies, and
-the word is read aloud. 🎉
+A colorful, no-setup phonics app for toddlers and early readers. The child learns
+letter **sounds** (not just names), tricky **letter combinations**, and practices
+**spelling** — all by tapping, listening, and playing. Everything reads aloud,
+celebrates with stars and confetti, and uses big touch-friendly buttons.
 
-## How to play
+Live link (open on a phone/tablet): **https://clingck.github.io/python-binance/**
 
-1. An animal picture appears (e.g. 🐶) with empty letter boxes below it.
-2. Three big letter buttons are shown. The child taps the letter that comes next.
-3. A correct letter fills the box and turns green; a wrong letter wiggles and the
-   child can try again — nothing is ever "lost".
-4. Finish the word to earn a star ⭐ and move to the next animal.
-5. Spell every animal to reach the big celebration screen, then **Play Again**.
+## Activities
 
-## Features
+1. **🔤 Letter Sounds** — A–Z. Tap the big letter to hear its *sound* ("mmm",
+   "sss"), with a picture + example word (m → 🌙 moon). Swipe through with the
+   arrows or jump around with the alphabet strip.
+2. **🔡 Sound Combos** — the letter combinations from the phonics chart
+   (`ar, ir, ur, or, er`) plus common digraphs (`sh, ch, th, oo, ee, ai`), each
+   with example words and pictures. Includes a **listening game**: hear a sound,
+   tap the matching combo.
+3. **🎧 Sound Match Game** — hear a letter sound and tap the correct letter from
+   three choices. The most effective way for a toddler to actively learn sounds.
+4. **🐾 Spell the Pups** — spell rescue-pup and animal names by choosing the
+   correct next letter from three options. Finish a word for a star + confetti.
 
-- **No setup, no internet needed.** Everything is in one file using emoji
-  pictures — works offline in any modern browser.
-- **Reads words aloud** using the browser's built-in speech (tap the picture or
-  the 🔊 *Say it* button). Falls back gracefully if speech isn't available.
-- **Forgiving for little learners** — wrong taps just say "Try again 💪".
-- **Big, touch-friendly buttons** that work great on a tablet or phone.
-- 34 animals, from `cat` to `elephant`, shuffled into a fresh order each round.
+## Designed for little learners
 
-## Run it
+- **No internet or install needed** — one HTML file, emoji pictures, works offline.
+- **Reads everything aloud** using the browser's built-in speech.
+- **Forgiving** — wrong taps just say "Try again / Listen again", nothing is lost.
+- **Big buttons**, bright colors, instant rewards (stars + confetti).
 
-Just open `index.html` in any web browser — double-click the file, or:
+## A note on the rescue pups
+
+The "Spell the Pups" pack is a fan-style nod to the rescue-pup theme kids love —
+each pup is shown with a dog emoji and its job vehicle (🚓 police, 🚒 fire,
+🚁 helicopter, etc.). It does **not** use any official Paw Patrol artwork,
+logos, or images, since those are copyrighted; it's just the names as
+spelling words with friendly emoji.
+
+## Run it locally
+
+Open `index.html` in any browser, or serve it:
 
 ```bash
-# optional: serve it locally
 cd animal-spelling-app
-python3 -m http.server 8000
-# then visit http://localhost:8000
+python3 -m http.server 8000   # then visit http://localhost:8000
 ```
 
-## Customize the animals
+## Customize
 
-Open `index.html` and edit the `ANIMALS` list near the top of the `<script>`:
-
-```js
-var ANIMALS = [
-  { word: "cat", emoji: "🐱" },
-  { word: "dog", emoji: "🐶" },
-  // add your own: { word: "shark", emoji: "🦈" },
-];
-```
-
-Keep the words lowercase and the emoji a single picture, and they'll show up in
-the game automatically.
+Open `index.html` and edit the data lists near the top of the `<script>`:
+`LETTERS` (letter sounds), `COMBOS` (letter combinations), and `ANIMALS`
+(spelling words — including the pups). Keep words lowercase and emoji as single
+pictures.
