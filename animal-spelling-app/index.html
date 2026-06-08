@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>🐾 Spell the Animals!</title>
+<style>
+  :root {
+    --bg1: #ffe1f0;
+    --bg2: #d9f1ff;
+    --accent: #ff7eb6;
+    --accent2: #4dd0e1;
+    --good: #66bb6a;
+    --bad: #ef9a9a;
+    --ink: #3a2b4d;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: "Comic Sans MS", "Baloo", "Trebuchet MS", system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(135deg, var(--bg1), var(--bg2));
+    background-attachment: fixed;
+    overflow-x: hidden;
+  }
+
+  #app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 6vw, 3rem);
+    margin: 0 0 6px;
+    color: #fff;
+    text-shadow: 2px 3px 0 var(--accent), 4px 6px 0 rgba(0,0,0,0.08);
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.9rem, 3vw, 1.2rem);
+    margin: 0 0 18px;
+    opacity: 0.8;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 28px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    padding: 22px 18px 28px;
+    width: 100%;
+    max-width: 540px;
+  }
+
+  .animal {
+    font-size: clamp(5rem, 28vw, 9rem);
+    line-height: 1;
+    margin: 6px 0 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.15s ease;
+  }
+  .animal:active { transform: scale(0.92); }
+  .animal.bounce { animation: bounce 0.6s ease; }
+
+  @keyframes bounce {
+    0%,100% { transform: translateY(0) scale(1); }
+    30% { transform: translateY(-22px) scale(1.08); }
+    55% { transform: translateY(0) scale(0.96); }
+    75% { transform: translateY(-8px) scale(1.02); }
+  }
+
+  .hint { font-size: 0.95rem; opacity: 0.6; margin: 0 0 10px; }
+
+  .word {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0 22px;
+  }
+
+  .letter-slot {
+    width: clamp(40px, 11vw, 58px);
+    height: clamp(50px, 13vw, 70px);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #f3eefb;
+    border: 3px dashed #cdbce8;
+    color: var(--ink);
+  }
+  .letter-slot.filled {
+    background: var(--good);
+    border-style: solid;
+    border-color: var(--good);
+    color: #fff;
+    animation: pop 0.3s ease;
+  }
+  .letter-slot.active {
+    border-color: var(--accent);
+    background: #fff;
+    animation: glow 1s ease-in-out infinite alternate;
+  }
+  @keyframes glow {
+    from { box-shadow: 0 0 0 rgba(255,126,182,0); }
+    to { box-shadow: 0 0 14px rgba(255,126,182,0.7); }
+  }
+  @keyframes pop {
+    0% { transform: scale(0.5); }
+    70% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  .choices {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .choice {
+    width: clamp(72px, 22vw, 100px);
+    height: clamp(72px, 22vw, 100px);
+    border-radius: 20px;
+    border: none;
+    font-size: clamp(2rem, 9vw, 3rem);
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .choice:nth-child(1) { background: #ff8a65; }
+  .choice:nth-child(2) { background: #4dd0e1; }
+  .choice:nth-child(3) { background: #ba68c8; }
+  .choice:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+  .choice.wrong { animation: shake 0.4s ease; background: var(--bad) !important; }
+  .choice.right { animation: pop 0.35s ease; background: var(--good) !important; }
+  .choice:disabled { opacity: 0.5; cursor: default; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+  }
+
+  .feedback {
+    min-height: 1.6em;
+    font-size: 1.3rem;
+    margin: 16px 0 4px;
+    font-weight: 700;
+  }
+  .feedback.good { color: var(--good); }
+  .feedback.bad { color: #e57373; }
+
+  .footer {
+    margin-top: 16px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 999px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    background: var(--accent2);
+    color: #fff;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.12);
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.12); }
+  .btn.secondary { background: #b39ddb; }
+
+  .stars {
+    font-size: 1.4rem;
+    margin: 4px 0 10px;
+    min-height: 1.5em;
+    letter-spacing: 3px;
+  }
+
+  .progress {
+    font-size: 0.9rem;
+    opacity: 0.6;
+    margin-top: 10px;
+  }
+
+  /* Celebration overlay */
+  #celebrate {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: rgba(255,255,255,0.92);
+    z-index: 10;
+    text-align: center;
+    padding: 20px;
+  }
+  #celebrate.show { display: flex; }
+  #celebrate .big { font-size: clamp(3rem, 16vw, 7rem); }
+
+  .confetti {
+    position: fixed;
+    top: -20px;
+    width: 12px;
+    height: 12px;
+    z-index: 9;
+    pointer-events: none;
+    border-radius: 2px;
+  }
+  @keyframes fall {
+    to { transform: translateY(105vh) rotate(720deg); opacity: 0.4; }
+  }
+</style>
+</head>
+<body>
+  <div id="app">
+    <h1>🐾 Spell the Animals!</h1>
+    <p class="subtitle">Tap the letters in the right order 🌟</p>
+
+    <div class="card">
+      <div class="stars" id="stars"></div>
+      <div class="animal" id="animal" title="Tap me to hear the word!">🐶</div>
+      <p class="hint" id="hint">Tap the picture to hear the word</p>
+
+      <div class="word" id="word"></div>
+      <div class="choices" id="choices"></div>
+
+      <div class="feedback" id="feedback"></div>
+
+      <div class="footer">
+        <button class="btn" id="sayBtn">🔊 Say it</button>
+        <button class="btn secondary" id="skipBtn">⏭️ Next animal</button>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+  </div>
+
+  <div id="celebrate">
+    <div class="big" id="celebrateEmoji">🎉</div>
+    <h1 id="celebrateText" style="color:var(--accent);text-shadow:none;">You did it!</h1>
+    <button class="btn" id="playAgain">▶️ Play Again</button>
+  </div>
+
+<script>
+(function () {
+  "use strict";
+
+  // Each animal: the word to spell + its emoji picture.
+  // Words kept short and simple for early spellers.
+  var ANIMALS = [
+    { word: "cat", emoji: "🐱" },
+    { word: "dog", emoji: "🐶" },
+    { word: "pig", emoji: "🐷" },
+    { word: "cow", emoji: "🐮" },
+    { word: "fox", emoji: "🦊" },
+    { word: "bee", emoji: "🐝" },
+    { word: "owl", emoji: "🦉" },
+    { word: "ant", emoji: "🐜" },
+    { word: "bat", emoji: "🦇" },
+    { word: "hen", emoji: "🐔" },
+    { word: "fish", emoji: "🐟" },
+    { word: "frog", emoji: "🐸" },
+    { word: "duck", emoji: "🦆" },
+    { word: "lion", emoji: "🦁" },
+    { word: "bear", emoji: "🐻" },
+    { word: "goat", emoji: "🐐" },
+    { word: "crab", emoji: "🦀" },
+    { word: "bird", emoji: "🐦" },
+    { word: "snail", emoji: "🐌" },
+    { word: "horse", emoji: "🐴" },
+    { word: "sheep", emoji: "🐑" },
+    { word: "panda", emoji: "🐼" },
+    { word: "zebra", emoji: "🦓" },
+    { word: "snake", emoji: "🐍" },
+    { word: "mouse", emoji: "🐭" },
+    { word: "tiger", emoji: "🐯" },
+    { word: "koala", emoji: "🐨" },
+    { word: "whale", emoji: "🐳" },
+    { word: "rabbit", emoji: "🐰" },
+    { word: "monkey", emoji: "🐵" },
+    { word: "turtle", emoji: "🐢" },
+    { word: "penguin", emoji: "🐧" },
+    { word: "octopus", emoji: "🐙" },
+    { word: "elephant", emoji: "🐘" }
+  ];
+
+  var ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
+
+  // ---- DOM references ----
+  var animalEl = document.getElementById("animal");
+  var wordEl = document.getElementById("word");
+  var choicesEl = document.getElementById("choices");
+  var feedbackEl = document.getElementById("feedback");
+  var hintEl = document.getElementById("hint");
+  var starsEl = document.getElementById("stars");
+  var progressEl = document.getElementById("progress");
+  var sayBtn = document.getElementById("sayBtn");
+  var skipBtn = document.getElementById("skipBtn");
+  var celebrateEl = document.getElementById("celebrate");
+  var celebrateEmojiEl = document.getElementById("celebrateEmoji");
+  var celebrateTextEl = document.getElementById("celebrateText");
+  var playAgainBtn = document.getElementById("playAgain");
+
+  // ---- Game state ----
+  var deck = [];        // shuffled list of animals for this round
+  var deckIndex = 0;    // which animal we're on
+  var current = null;   // current animal object
+  var pos = 0;          // index of the next letter to spell
+  var solvedCount = 0;  // animals completed this round
+
+  // ---- Helpers ----
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function randItem(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  // Speak the word aloud using the browser's built-in voice (if available).
+  function speak(text) {
+    try {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.rate = 0.85;
+      u.pitch = 1.15;
+      window.speechSynthesis.speak(u);
+    } catch (e) { /* speech not available — fine, app still works */ }
+  }
+
+  // Build the three letter choices: the correct next letter + two random others.
+  function buildChoices(correctLetter) {
+    var options = [correctLetter];
+    var guard = 0;
+    while (options.length < 3 && guard < 200) {
+      guard++;
+      var L = randItem(ALPHABET);
+      if (options.indexOf(L) === -1) options.push(L);
+    }
+    return shuffle(options);
+  }
+
+  // Render the row of letter slots for the current word.
+  function renderWord() {
+    wordEl.innerHTML = "";
+    var letters = current.word.split("");
+    for (var i = 0; i < letters.length; i++) {
+      var slot = document.createElement("div");
+      slot.className = "letter-slot";
+      if (i < pos) {
+        slot.classList.add("filled");
+        slot.textContent = letters[i];
+      } else if (i === pos) {
+        slot.classList.add("active");
+        slot.textContent = "";
+      } else {
+        slot.textContent = "";
+      }
+      wordEl.appendChild(slot);
+    }
+  }
+
+  // Render the three choice buttons for the current letter position.
+  function renderChoices() {
+    choicesEl.innerHTML = "";
+    var correct = current.word[pos];
+    var opts = buildChoices(correct);
+    opts.forEach(function (letter) {
+      var btn = document.createElement("button");
+      btn.className = "choice";
+      btn.textContent = letter;
+      btn.addEventListener("click", function () {
+        handleChoice(letter, btn, correct);
+      });
+      choicesEl.appendChild(btn);
+    });
+  }
+
+  function setFeedback(msg, kind) {
+    feedbackEl.textContent = msg;
+    feedbackEl.className = "feedback" + (kind ? " " + kind : "");
+  }
+
+  function handleChoice(letter, btn, correct) {
+    if (letter === correct) {
+      btn.classList.add("right");
+      setFeedback("Yes! 🎯", "good");
+      pos++;
+      if (pos >= current.word.length) {
+        // Whole word done!
+        wordWin();
+      } else {
+        // Move on to the next letter shortly.
+        setTimeout(function () {
+          renderWord();
+          renderChoices();
+          feedbackEl.textContent = "";
+        }, 450);
+      }
+    } else {
+      btn.classList.add("wrong");
+      btn.disabled = true;
+      setFeedback("Try again! 💪", "bad");
+      // Gentle reminder of where we are.
+      setTimeout(function () { btn.classList.remove("wrong"); }, 450);
+    }
+  }
+
+  function bounceAnimal() {
+    animalEl.classList.remove("bounce");
+    void animalEl.offsetWidth; // restart animation
+    animalEl.classList.add("bounce");
+  }
+
+  function wordWin() {
+    solvedCount++;
+    renderWord(); // fill last slot
+    setFeedback("🎉 " + current.word.toUpperCase() + "! Great job!", "good");
+    bounceAnimal();
+    speak(current.word);
+    burstConfetti();
+    updateStars();
+    // Lock choices during the celebration moment.
+    Array.prototype.forEach.call(choicesEl.children, function (c) { c.disabled = true; });
+    setTimeout(nextAnimal, 1500);
+  }
+
+  function updateStars() {
+    starsEl.textContent = "⭐".repeat(Math.min(solvedCount, 10));
+  }
+
+  function nextAnimal() {
+    deckIndex++;
+    if (deckIndex >= deck.length) {
+      showCelebration();
+      return;
+    }
+    loadAnimal();
+  }
+
+  function loadAnimal() {
+    current = deck[deckIndex];
+    pos = 0;
+    animalEl.textContent = current.emoji;
+    hintEl.textContent = "Spell the word — tap the picture to hear it!";
+    feedbackEl.textContent = "";
+    renderWord();
+    renderChoices();
+    progressEl.textContent = "Animal " + (deckIndex + 1) + " of " + deck.length;
+    speak(current.word);
+  }
+
+  function startRound() {
+    deck = shuffle(ANIMALS);
+    deckIndex = 0;
+    solvedCount = 0;
+    updateStars();
+    celebrateEl.classList.remove("show");
+    loadAnimal();
+  }
+
+  function showCelebration() {
+    celebrateEmojiEl.textContent = randItem(["🎉", "🏆", "🌟", "🎈", "🥳"]);
+    celebrateTextEl.textContent = "Amazing! You spelled them all!";
+    celebrateEl.classList.add("show");
+    bigConfetti();
+    speak("Amazing! You spelled them all!");
+  }
+
+  // ---- Confetti (pure CSS/JS, no images) ----
+  var CONFETTI_COLORS = ["#ff8a65", "#4dd0e1", "#ba68c8", "#ffd54f", "#66bb6a", "#ff7eb6"];
+
+  function makeConfetti(count) {
+    for (var i = 0; i < count; i++) {
+      (function () {
+        var c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random() * 100 + "vw";
+        c.style.background = randItem(CONFETTI_COLORS);
+        var dur = 1.8 + Math.random() * 1.5;
+        c.style.animation = "fall " + dur + "s linear forwards";
+        c.style.transform = "translateY(0) rotate(0deg)";
+        document.body.appendChild(c);
+        setTimeout(function () { c.remove(); }, dur * 1000 + 100);
+      })();
+    }
+  }
+
+  function burstConfetti() { makeConfetti(18); }
+  function bigConfetti() { makeConfetti(80); }
+
+  // ---- Events ----
+  animalEl.addEventListener("click", function () {
+    bounceAnimal();
+    speak(current.word);
+  });
+  sayBtn.addEventListener("click", function () { speak(current.word); });
+  skipBtn.addEventListener("click", function () { nextAnimal(); });
+  playAgainBtn.addEventListener("click", startRound);
+
+  // Warm up speech voices (some browsers load them lazily).
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.getVoices();
+  }
+
+  // Go!
+  startRound();
+})();
+</script>
+</body>
+</html>
