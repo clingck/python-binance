@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>🪐 Planet Spelling — Sounds & Letters</title>
+<style>
+  :root {
+    --bg1: #1b2a4a;
+    --bg2: #3b2a5a;
+    --ink: #2a2440;
+    --good: #66bb6a;
+    --accent: #ffd54f;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; min-height: 100%;
+    font-family: "Comic Sans MS", "Baloo", "Trebuchet MS", system-ui, sans-serif;
+    color: #fff;
+    background: radial-gradient(circle at 20% 10%, #2d3e6b, #1b2a4a 60%, #14102b 100%);
+    background-attachment: fixed; overflow-x: hidden;
+  }
+  /* twinkly stars backdrop */
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      radial-gradient(1.5px 1.5px at 20% 30%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 70% 20%, #fff, transparent),
+      radial-gradient(2px 2px at 40% 70%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 85% 60%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 55% 45%, #fff, transparent),
+      radial-gradient(2px 2px at 10% 80%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 90% 90%, #fff, transparent);
+    opacity: 0.7;
+  }
+  #app { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 14px; text-align: center; }
+
+  h1 { font-size: clamp(1.5rem, 6vw, 2.6rem); margin: 4px 0; text-shadow: 0 2px 8px rgba(0,0,0,0.5); letter-spacing: 1px; }
+  .subtitle { font-size: clamp(0.85rem, 3vw, 1.05rem); margin: 0 0 12px; opacity: 0.85; }
+
+  .card {
+    background: rgba(255,255,255,0.97); color: var(--ink);
+    border-radius: 28px; box-shadow: 0 14px 36px rgba(0,0,0,0.4);
+    padding: 18px 16px 22px; width: 100%; max-width: 560px;
+  }
+
+  .stars { font-size: 1.3rem; min-height: 1.4em; letter-spacing: 3px; }
+  .progress { font-size: 0.95rem; opacity: 0.7; margin: 2px 0 6px; font-weight: 700; }
+  .planet-name { font-size: clamp(1.4rem, 7vw, 2.2rem); font-weight: 900; margin: 2px 0 4px; text-transform: capitalize; }
+  .dwarf-tag { font-size: 0.8rem; background: #ede3ff; color: #7e57c2; border-radius: 999px; padding: 2px 10px; font-weight: 800; }
+
+  .planet {
+    width: clamp(140px, 46vw, 200px); height: clamp(140px, 46vw, 200px);
+    margin: 6px auto 2px; cursor: pointer; user-select: none; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.35));
+    transition: transform 0.15s ease;
+  }
+  .planet:active { transform: scale(0.93); }
+  .planet.spin { animation: spin 0.7s ease; }
+  @keyframes spin { 0%{transform:rotate(0) scale(1)} 50%{transform:rotate(8deg) scale(1.06)} 100%{transform:rotate(0) scale(1)} }
+
+  /* sound parts (syllables) */
+  .parts-label { font-size: 0.9rem; opacity: 0.7; margin: 10px 0 4px; font-weight: 700; }
+  .parts { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+  .part {
+    border: none; border-radius: 14px; padding: 10px 16px; cursor: pointer;
+    font-family: inherit; font-weight: 900; color: #fff; text-transform: lowercase;
+    font-size: clamp(1.2rem, 6vw, 1.8rem); box-shadow: 0 5px 0 rgba(0,0,0,0.18);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .part:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0,0,0,0.18); }
+  .part.say { animation: pop 0.4s ease; }
+  @keyframes pop { 0%{transform:scale(1)} 45%{transform:scale(1.18)} 100%{transform:scale(1)} }
+
+  /* spelling slots */
+  .word { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin: 14px 0 16px; }
+  .slot {
+    width: clamp(34px, 9.5vw, 50px); height: clamp(44px, 12vw, 62px); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(1.4rem, 6.5vw, 2.1rem); font-weight: 800; text-transform: uppercase;
+    background: #f3eefb; border: 3px solid #e3d8f5; border-bottom-width: 6px; color: var(--ink);
+  }
+  .slot.filled { color: #fff; animation: pop 0.3s ease; }
+  .slot.active { background: #fff; box-shadow: 0 0 0 3px rgba(255,213,79,0.7); }
+
+  .choices { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .choice {
+    width: clamp(72px, 24vw, 110px); height: clamp(72px, 24vw, 110px); border-radius: 20px; border: none;
+    font-size: clamp(2rem, 10vw, 3rem); font-weight: 900; text-transform: lowercase; color: #fff;
+    cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,0.2); transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .choice:nth-child(1){background:#ff8a65}.choice:nth-child(2){background:#4dd0e1}.choice:nth-child(3){background:#ba68c8}
+  .choice:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+  .choice.wrong { animation: shake 0.4s ease; }
+  .choice.right { animation: pop 0.4s ease; background: var(--good) !important; }
+  .choice:disabled { opacity: 0.5; }
+  @keyframes shake { 0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)} }
+
+  .feedback { min-height: 1.5em; font-size: 1.25rem; font-weight: 800; margin: 12px 0 2px; }
+  .feedback.good { color: var(--good); } .feedback.bad { color: #e57373; }
+
+  .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+  .btn {
+    border: none; border-radius: 999px; padding: 12px 20px; font-size: 1rem; font-weight: 800;
+    font-family: inherit; cursor: pointer; color: #fff; background: #5c6bc0; box-shadow: 0 5px 0 rgba(0,0,0,0.2);
+  }
+  .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0,0,0,0.2); }
+  .btn.sound { background: #ff7043; } .btn.say { background: #26a69a; } .btn.next { background: #7e57c2; }
+  .hint { font-size: 0.85rem; opacity: 0.6; margin: 10px 0 0; color: var(--ink); }
+
+  .confetti { position: fixed; top: -20px; width: 12px; height: 12px; z-index: 9; pointer-events: none; border-radius: 2px; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0.4; } }
+
+  .backlink { display:inline-block; margin-top: 16px; color:#cdd6ff; font-size:0.9rem; opacity:0.8; text-decoration:none; }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>🪐 Planet Spelling!</h1>
+  <p class="subtitle">Sound out the parts, then spell the planet 🚀</p>
+
+  <div class="card">
+    <div class="stars" id="stars"></div>
+    <div class="progress" id="progress"></div>
+    <div class="planet-name"><span id="planetName">Mercury</span> <span class="dwarf-tag" id="dwarfTag" style="display:none">dwarf planet</span></div>
+
+    <div class="planet" id="planet" title="Tap to hear the name"></div>
+
+    <p class="parts-label">👂 Tap a part to hear its sound</p>
+    <div class="parts" id="parts"></div>
+
+    <div class="word" id="word"></div>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+
+    <div class="row">
+      <button class="btn sound" id="soundOut">🔊 Sound it out</button>
+      <button class="btn say" id="sayWhole">🔊 Say it</button>
+      <button class="btn next" id="skip">⏭️ Next</button>
+    </div>
+    <p class="hint">Pick the next letter — the colours show which letters make each sound</p>
+  </div>
+
+  <a class="backlink" href="../">⬅️ More learning games</a>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ===== Speech helpers =====
+  function speak(text, rate) {
+    try {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.rate = rate || 0.8; u.pitch = 1.1;
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  // Queue several phrases in order (used to sound out the parts then the whole word).
+  function speakSequence(parts) {
+    try {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      parts.forEach(function (p) {
+        var u = new SpeechSynthesisUtterance(p.text);
+        u.rate = p.rate || 0.75; u.pitch = 1.1;
+        window.speechSynthesis.speak(u);
+      });
+    } catch (e) {}
+  }
+  function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} return a; }
+  function randItem(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+  // Colors used to tie each sound-part to its letters.
+  var SYL_COLORS = ["#ff7043", "#26c6da", "#ab47bc", "#43a047"];
+
+  // ===== Planets =====
+  // chunks = how the name is shown in sound-parts; say = a phonetic hint so the
+  // voice pronounces each part naturally. The chunks always join to the full word.
+  var PLANETS = [
+    {word:"mercury", light:"#cfcfcf", base:"#8d8d8d", bands:["#6f6f6f","#a6a6a6"],            chunks:["Mer","cu","ry"], say:["mur","cue","ree"]},
+    {word:"venus",   light:"#f1d9a0", base:"#caa45a", bands:["#b98b3e","#e3c483"],            chunks:["Ve","nus"],       say:["vee","nus"]},
+    {word:"earth",   light:"#7fc4ff", base:"#2a7bd6", bands:["#3fae6b","#2f8f57","#6fb6ff"],  chunks:["Earth"],          say:["earth"]},
+    {word:"mars",    light:"#e8825a", base:"#b5421f", bands:["#8f3115","#c95a32"],            chunks:["Mars"],           say:["mars"]},
+    {word:"jupiter", light:"#e9cda6", base:"#c79a6b", bands:["#a9794a","#d8b489","#9c6b3f"],  chunks:["Ju","pi","ter"],  say:["joo","pih","ter"]},
+    {word:"saturn",  light:"#f0dcab", base:"#d8b87f", bands:["#c2a062","#e7cf9b"], ring:"#cdb98c", chunks:["Sa","turn"],  say:["sa","turn"]},
+    {word:"uranus",  light:"#cdeef0", base:"#8fd3d6", bands:["#74c2c6","#a7dfe2"], ring:"#bfe6e8", chunks:["U","ra","nus"], say:["your","uh","nus"]},
+    {word:"neptune", light:"#7d92e6", base:"#3b53b5", bands:["#2f429a","#5167c9"],            chunks:["Nep","tune"],     say:["nep","toon"]},
+    {word:"pluto",   light:"#e3d3c2", base:"#b9a18c", bands:["#a08977","#cdbaa6"], dwarf:true,  chunks:["Plu","to"],      say:["ploo","toe"]}
+  ];
+
+  // Build a simple original cartoon planet as an SVG (no copyrighted art).
+  function planetSVG(p) {
+    var uid = "p" + p.word;
+    var stripes = "";
+    (p.bands || []).forEach(function (b, i) {
+      var n = p.bands.length;
+      var cy = 80 - 34 + (i + 1) * (68 / (n + 1));
+      stripes += '<ellipse cx="80" cy="' + cy.toFixed(1) + '" rx="52" ry="' + (4 + (i % 2) * 3) + '" fill="' + b + '" opacity="0.55"/>';
+    });
+    var ringBack = p.ring ? '<ellipse cx="80" cy="80" rx="76" ry="20" fill="none" stroke="' + p.ring + '" stroke-width="10" transform="rotate(-20 80 80)" opacity="0.85"/>' : '';
+    var ringFront = p.ring ? '<path d="M 12 88 A 76 20 -20 0 0 148 72" fill="none" stroke="' + p.ring + '" stroke-width="10" opacity="0.95"/>' : '';
+    return '<svg viewBox="0 0 160 160" width="100%" height="100%" aria-hidden="true">'
+      + '<defs><radialGradient id="' + uid + '" cx="38%" cy="34%">'
+      + '<stop offset="0%" stop-color="' + p.light + '"/><stop offset="100%" stop-color="' + p.base + '"/></radialGradient>'
+      + '<clipPath id="c' + uid + '"><circle cx="80" cy="80" r="52"/></clipPath></defs>'
+      + ringBack
+      + '<circle cx="80" cy="80" r="52" fill="url(#' + uid + ')"/>'
+      + '<g clip-path="url(#c' + uid + ')">' + stripes + '</g>'
+      + '<circle cx="80" cy="80" r="52" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="2"/>'
+      + ringFront
+      + '</svg>';
+  }
+
+  // Map each letter index to the sound-part (syllable) it belongs to.
+  function letterSyllable(p) {
+    var map = [], s = 0;
+    p.chunks.forEach(function (c, i) { for (var k = 0; k < c.length; k++) map[s++] = i; });
+    return map;
+  }
+
+  // ===== DOM =====
+  var planetEl = document.getElementById("planet");
+  var planetName = document.getElementById("planetName");
+  var dwarfTag = document.getElementById("dwarfTag");
+  var partsEl = document.getElementById("parts");
+  var wordEl = document.getElementById("word");
+  var choicesEl = document.getElementById("choices");
+  var feedbackEl = document.getElementById("feedback");
+  var starsEl = document.getElementById("stars");
+  var progressEl = document.getElementById("progress");
+
+  // ===== State =====
+  var deck = [], idx = 0, cur = null, pos = 0, score = 0, sylMap = [];
+
+  var ALPHA = "abcdefghijklmnopqrstuvwxyz".split("");
+
+  function speakParts() {
+    var seq = cur.say.map(function (s) { return {text: s, rate: 0.7}; });
+    seq.push({text: cur.word, rate: 0.78});
+    speakSequence(seq);
+    // gently pop each part in turn for a visual cue
+    Array.prototype.forEach.call(partsEl.children, function (el, i) {
+      setTimeout(function () { el.classList.remove("say"); void el.offsetWidth; el.classList.add("say"); }, i * 650);
+    });
+  }
+  function sayWhole() {
+    planetEl.classList.remove("spin"); void planetEl.offsetWidth; planetEl.classList.add("spin");
+    speak(cur.word, 0.78);
+  }
+
+  function renderParts() {
+    partsEl.innerHTML = "";
+    cur.chunks.forEach(function (c, i) {
+      var b = document.createElement("button");
+      b.className = "part"; b.textContent = c.toLowerCase();
+      b.style.background = SYL_COLORS[i % SYL_COLORS.length];
+      b.addEventListener("click", function () {
+        b.classList.remove("say"); void b.offsetWidth; b.classList.add("say");
+        speak(cur.say[i], 0.7);
+      });
+      partsEl.appendChild(b);
+    });
+  }
+
+  function renderWord() {
+    wordEl.innerHTML = "";
+    cur.word.split("").forEach(function (ch, i) {
+      var d = document.createElement("div");
+      d.className = "slot";
+      var color = SYL_COLORS[sylMap[i] % SYL_COLORS.length];
+      d.style.borderColor = color;
+      if (i < pos) { d.classList.add("filled"); d.style.background = color; d.textContent = ch; }
+      else if (i === pos) { d.classList.add("active"); }
+      wordEl.appendChild(d);
+    });
+  }
+
+  function renderChoices() {
+    choicesEl.innerHTML = "";
+    var correct = cur.word[pos];
+    var opts = [correct];
+    while (opts.length < 3) { var L = randItem(ALPHA); if (opts.indexOf(L) < 0) opts.push(L); }
+    shuffle(opts).forEach(function (L) {
+      var b = document.createElement("button");
+      b.className = "choice"; b.textContent = L;
+      b.addEventListener("click", function () { pick(L, b, correct); });
+      choicesEl.appendChild(b);
+    });
+  }
+
+  function pick(L, btn, correct) {
+    if (L === correct) {
+      btn.classList.add("right");
+      feedbackEl.textContent = "Yes! 🎯"; feedbackEl.className = "feedback good";
+      // say the sound-part this letter completes, when we finish a part
+      pos++;
+      if (pos >= cur.word.length) { win(); }
+      else {
+        var finishedPart = sylMap[pos - 1] !== sylMap[pos];
+        setTimeout(function () {
+          renderWord(); renderChoices(); feedbackEl.textContent = "";
+          if (finishedPart) speak(cur.say[sylMap[pos - 1]], 0.7);
+        }, 420);
+      }
+    } else {
+      btn.classList.add("wrong"); btn.disabled = true;
+      feedbackEl.textContent = "Try again 💪"; feedbackEl.className = "feedback bad";
+      setTimeout(function () { btn.classList.remove("wrong"); }, 450);
+    }
+  }
+
+  function win() {
+    score++; renderWord();
+    feedbackEl.textContent = "🎉 " + cur.word.toUpperCase() + "!"; feedbackEl.className = "feedback good";
+    starsEl.textContent = "⭐".repeat(Math.min(score, 10));
+    sayWhole(); confetti(20);
+    Array.prototype.forEach.call(choicesEl.children, function (c) { c.disabled = true; });
+    setTimeout(next, 1700);
+  }
+
+  function next() {
+    idx++;
+    if (idx >= deck.length) { deck = shuffle(PLANETS); idx = 0; }
+    load();
+  }
+
+  function load() {
+    cur = deck[idx]; pos = 0; sylMap = letterSyllable(cur);
+    planetEl.innerHTML = planetSVG(cur);
+    planetName.textContent = cur.word;
+    dwarfTag.style.display = cur.dwarf ? "" : "none";
+    starsEl.textContent = "⭐".repeat(Math.min(score, 10));
+    progressEl.textContent = "Planet " + (idx + 1) + " of " + deck.length;
+    feedbackEl.textContent = "";
+    renderParts(); renderWord(); renderChoices();
+    setTimeout(speakParts, 350);
+  }
+
+  // ===== Confetti =====
+  var CC = ["#ff8a65","#4dd0e1","#ba68c8","#ffd54f","#66bb6a","#ff7eb6"];
+  function confetti(n){ for(var i=0;i<n;i++){ (function(){ var c=document.createElement("div"); c.className="confetti"; c.style.left=Math.random()*100+"vw"; c.style.background=randItem(CC); var d=1.6+Math.random()*1.4; c.style.animation="fall "+d+"s linear forwards"; document.body.appendChild(c); setTimeout(function(){c.remove();}, d*1000+100); })(); } }
+
+  // ===== Events =====
+  planetEl.addEventListener("click", sayWhole);
+  document.getElementById("soundOut").addEventListener("click", speakParts);
+  document.getElementById("sayWhole").addEventListener("click", sayWhole);
+  document.getElementById("skip").addEventListener("click", next);
+
+  if ("speechSynthesis" in window) { window.speechSynthesis.getVoices(); }
+
+  // Start in order from Mercury so it doubles as a tour of the solar system.
+  deck = PLANETS.slice();
+  idx = 0; score = 0;
+  load();
+})();
+</script>
+</body>
+</html>
