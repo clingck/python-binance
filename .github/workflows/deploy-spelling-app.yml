@@ -1,6 +1,6 @@
-name: Deploy Spell the Animals app
+name: Deploy kids learning apps
 
-# Publishes the kids' spelling game to GitHub Pages so it can be opened
+# Publishes the kids' learning games to GitHub Pages so they can be opened
 # as a normal web link on a phone or tablet (where JavaScript runs).
 on:
   push:
@@ -9,6 +9,7 @@ on:
       - claude/animal-spelling-app-6ijwb2
     paths:
       - "animal-spelling-app/**"
+      - "planets-spelling-app/**"
       - ".github/workflows/deploy-spelling-app.yml"
   workflow_dispatch:
 
@@ -35,10 +36,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload the app folder as the site
+      - name: Stage both apps into the site
+        run: |
+          rm -rf _site && mkdir -p _site/planets
+          cp -r animal-spelling-app/. _site/
+          cp -r planets-spelling-app/. _site/planets/
+
+      - name: Upload the site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./animal-spelling-app
+          path: ./_site
 
       - name: Deploy to GitHub Pages
         id: deployment
